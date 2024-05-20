@@ -1,0 +1,6 @@
+model/
+figs/
+results/
+test_log/
+predictions/
+data/

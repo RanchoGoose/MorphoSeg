@@ -390,6 +390,22 @@ class VisionTransformer(nn.Module):
         logits = self.segmentation_head(x)
         return logits
 
+    def forward_virtual(self, x):
+        if x.size()[1] == 1:
+            x = x.repeat(1,3,1,1)
+        y, attn_weights, features = self.transformer(x)  # (B, n_patch, hidden)
+        x = self.decoder(y, features)
+        logits = self.segmentation_head(x)
+        return y, logits
+
+    # def forward_logits(self, x, syn_features):
+    #     if x.size()[1] == 1:
+    #         x = x.repeat(1,3,1,1)
+    #     x, attn_weights, features = self.transformer(x)  # (B, n_patch, hidden)
+    #     x = self.decoder(x, syn_features)
+    #     logits = self.segmentation_head(x)
+    #     return logits
+    
     def load_from(self, weights):
         with torch.no_grad():
 
