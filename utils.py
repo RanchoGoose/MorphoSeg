@@ -188,7 +188,7 @@ def test_single_volume(image, label, net, classes, patch_size=[256, 256], test_s
         sitk.WriteImage(img_itk, test_save_path + '/'+ case + "_img.png")
         sitk.WriteImage(lab_itk, test_save_path + '/'+ case + "_gt.png")
         
-        overlay_mask_on_image_and_save(img_uint8, prd_uint8, save_path=test_save_path + '/' + case + "_vis.png", alpha=0.3, mask_color='red', dpi=300, threshold=0.1)
+        overlay_mask_on_image_and_save(img_uint8, prd_uint8, save_path=test_save_path + '/' + case + "_vis.png", alpha=0.3, mask_color='red', dpi=300, threshold=0.5)
 
     return metric_list
 

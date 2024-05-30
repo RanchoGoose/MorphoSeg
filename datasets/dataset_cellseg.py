@@ -100,7 +100,8 @@ class CellSeg_dataset(Dataset):
         self.test_split_ratio = test_split_ratio
         self.sample_list = open(os.path.join(list_dir, f'{self.split}.txt')).readlines()
         # Filter the list to exclude samples with zero masks
-        if self.split in ["train", "test"]:
+        # if self.split in ["train", "test"]:
+        if self.split == "train":
             self.filter_samples_with_nonzero_masks()
         
     def __len__(self):

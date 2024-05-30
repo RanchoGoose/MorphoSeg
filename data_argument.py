@@ -55,40 +55,6 @@ def divide_images_and_masks(image_dir, mask_dir, output_dir, patch_sizes=[224], 
 
     return full_image_list, full_mask_list
 
-# def divide_images_and_masks(image_dir, mask_dir, output_dir, patch_sizes=[224], overlap=0.1, output_size=224):
-#     os.makedirs(output_dir, exist_ok=True)
-#     for filename in os.listdir(image_dir):
-#         if not filename.endswith('.tif'): continue  # Adjust the extension according to your files
-#         image_path = os.path.join(image_dir, filename)
-#         mask_path = os.path.join(mask_dir, filename.replace('.tif', '_mask.tif'))  # Adjust naming convention as needed
-
-#         image = Image.open(image_path)
-#         mask = Image.open(mask_path)
-#         width, height = image.size
-        
-#         # Determine if the full-size image should be used directly
-#         if max(patch_sizes) >= min(width, height):
-#             # Process the full-size image directly
-#             image.save(os.path.join(output_dir, filename.replace('.tif', '.png')))
-#             mask.save(os.path.join(output_dir, filename.replace('.tif', '_mask.png')))
-#         else:
-#             # Proceed with dividing the image into patches
-#             for patch_size in patch_sizes:
-#                 # Ensure the patch size is smaller than the image dimensions
-#                 if patch_size < min(width, height):
-#                     step_size = int(patch_size * (1 - overlap))  # Calculate step size based on overlap
-#                     for i in range(0, height - patch_size + 1, step_size):
-#                         for j in range(0, width - patch_size + 1, step_size):
-#                             image_patch = image.crop((j, i, j + patch_size, i + patch_size)).resize((output_size, output_size))
-#                             mask_patch = mask.crop((j, i, j + patch_size, i + patch_size)).resize((output_size, output_size))
-
-#                             image_patch = image_patch.convert('L')  # Convert to grayscale if needed
-#                             mask_patch = mask_patch.convert('L')  # Convert to grayscale if needed
-
-#                             patch_filename = f'{filename[:-4]}_ps{patch_size}_{i}_{j}.png'  # Include patch size in filename
-#                             image_patch.save(os.path.join(output_dir, patch_filename))
-#                             mask_patch.save(os.path.join(output_dir, patch_filename.replace('.png', '_mask.png')))
-
 image_dir = '/mnt/parscratch/users/coq20tz/cellpose/data_raw/img'
 mask_dir = '/mnt/parscratch/users/coq20tz/cellpose/data_raw/binary_mask'
 output_dir = '/mnt/parscratch/users/coq20tz/TransUNet/data/cell_arg'
@@ -141,3 +107,19 @@ write_paths(train_files_full, os.path.join(lists_dir, 'train_full.txt'))
 write_paths(test_files_full, os.path.join(lists_dir,  'test_full.txt'))
 write_paths(train_files, os.path.join(lists_dir, 'train.txt'))
 write_paths(test_files, os.path.join(lists_dir,  'test.txt'))
+
+
+def generate_or_load_splits(data_dir, list_dir):
+    eval_list_path = os.path.join(list_dir, 'eval.txt')
+
+    if os.path.exists(eval_list_path):
+        return
+    
+    all_files = [f for f in os.listdir(data_dir) if f.endswith('.tif') and not f.endswith('_mask.tif')]
+
+    with open(eval_list_path, 'w') as f:
+        for item in all_files:
+            f.write("%s\n" % item)
+
+data_dir = '/mnt/parscratch/users/coq20tz/cellpose/data_raw/full_img'
+generate_or_load_splits(data_dir, list_dir)

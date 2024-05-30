@@ -3,7 +3,8 @@ This repo holds code for stem cell segmentation. The codes are built based on th
 
 ## Usage
 
-### 1. Download Google pre-trained ViT models
+### 1. Download pre-trained models
+To train the model please down the Google ViT pre-trained models
 * [Get models in this link](https://console.cloud.google.com/storage/vit_models/): R50-ViT-B_16, ViT-B_16, ViT-L_16...
 ```bash
 wget https://storage.googleapis.com/vit_models/imagenet21k/{MODEL_NAME}.npz &&
@@ -11,9 +12,26 @@ mkdir ../model/vit_checkpoint/imagenet21k &&
 mv {MODEL_NAME}.npz ../model/vit_checkpoint/imagenet21k/{MODEL_NAME}.npz
 ```
 
-### 2. Prepare data
+*For inference only, download the provided [checkpoint](https://drive.google.com/drive/folders/1A2fYP5uPjevKxKek0pneYLQzUPSQISua?usp=sharing)
 
-Download the data and the labels from:
+### 2. Prepare data
+Generate Train and Test Lists:
+
+Download the data dirst, then run the following script to spilit the data into training and testing 224x224 patches, you will need to change the data path in the script:
+
+```bash
+python data_pre.py --mode train_test --dataset_dir /path/to/dataset --lists_dir /path/to/lists --train_ratio 0.8
+
+```
+
+For inference:
+Generate Eval List:
+
+```bash
+python data_pre.py --mode eval --image_dir /path/to/images --mask_dir /path/to/masks --output_dir /path/to/output --lists_dir /path/to/lists
+
+
+```
 
 ### 3. Environment
 
