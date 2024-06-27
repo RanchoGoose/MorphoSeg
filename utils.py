@@ -61,7 +61,6 @@ def calculate_metric_percase(pred, gt):
         return 0, 0
 
 SMOOTH = 1e-6
-iou_thresholds = [0.5, 0.75, 0.9]
 
 def iou_pytorch(outputs: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
     """
@@ -124,7 +123,75 @@ def calculate_iou_ap_per_class(prediction, label, iou_thresholds):
     ap = np.mean(iou_scores)
     return iou_scores, ap
 
-def test_single_volume(image, label, net, classes, patch_size=[256, 256], test_save_path=None, case=None, z_spacing=1):
+# def test_single_volume(image, label, net, classes, patch_size=[256, 256], test_save_path=None, case=None, z_spacing=1):
+#     image, label = image.squeeze(0).cpu().detach().numpy(), label.squeeze(0).cpu().detach().numpy()
+    
+#     prediction = np.zeros_like(label) if len(image.shape) == 3 else None  # Adjust for 2D or 3D
+    
+#     if image.shape[-2] > patch_size[0] or image.shape[-1] > patch_size[1]:
+#         prediction = infer_large_image_in_patches(image, net, patch_size=[224, 224], overlap=56, device='cuda')
+#     else:
+#         if len(image.shape) == 3:
+#             prediction = np.zeros_like(label)
+#             for ind in range(image.shape[0]):
+#                 slice = image[ind, :, :]
+#                 x, y = slice.shape[0], slice.shape[1]
+#                 if x != patch_size[0] or y != patch_size[1]:
+#                     slice = zoom(slice, (patch_size[0] / x, patch_size[1] / y), order=3)  # previous using 0
+#                 input = torch.from_numpy(slice).unsqueeze(0).unsqueeze(0).float().cuda()
+#                 net.eval()
+#                 with torch.no_grad():
+#                     outputs = net(input)
+#                     out = torch.argmax(torch.softmax(outputs, dim=1), dim=1).squeeze(0)
+#                     out = out.cpu().detach().numpy()
+#                     if x != patch_size[0] or y != patch_size[1]:
+#                         pred = zoom(out, (x / patch_size[0], y / patch_size[1]), order=0)
+#                     else:
+#                         pred = out
+#                     prediction[ind] = pred
+#         else:
+#             input = torch.from_numpy(image).unsqueeze(
+#                 0).unsqueeze(0).float().cuda()
+#             net.eval()
+#             with torch.no_grad():
+#                 out = torch.argmax(torch.softmax(net(input), dim=1), dim=1).squeeze(0)
+#                 prediction = out.cpu().detach().numpy()
+                
+#     metric_list = []
+#     # ap_list = []
+#     for i in range(1, classes):
+#         metric_list.append(calculate_metric_percase(prediction == i, label == i))       
+#         # pred_mask = (prediction == i).astype(int)
+#         # true_mask = (label == i).astype(int)
+#         # iou_scores, ap = calculate_iou_ap_per_class(pred_mask, true_mask, iou_thresholds)
+#         # metric_list.append(iou_scores)
+#         # ap_list.append(ap)
+
+#     if test_save_path is not None:
+#         # img_itk = sitk.GetImageFromArray(image.astype(np.float32))
+#         # prd_itk = sitk.GetImageFromArray(prediction.astype(np.float32))
+#         # lab_itk = sitk.GetImageFromArray(label.astype(np.float32))
+        
+#         # Convert images to uint8
+#         img_uint8 = convert_to_uint8(image)
+#         prd_uint8 = convert_to_uint8(prediction)
+#         lab_uint8 = convert_to_uint8(label)
+#         # Convert numpy arrays to SimpleITK images
+#         img_itk = sitk.GetImageFromArray(img_uint8)
+#         prd_itk = sitk.GetImageFromArray(prd_uint8)
+#         lab_itk = sitk.GetImageFromArray(lab_uint8)        
+#         img_itk.SetSpacing((1, 1, z_spacing))
+#         prd_itk.SetSpacing((1, 1, z_spacing))
+#         lab_itk.SetSpacing((1, 1, z_spacing))
+#         sitk.WriteImage(prd_itk, test_save_path + '/'+case + "_pred.png")
+#         sitk.WriteImage(img_itk, test_save_path + '/'+ case + "_img.png")
+#         sitk.WriteImage(lab_itk, test_save_path + '/'+ case + "_gt.png")
+        
+#         overlay_mask_on_image_and_save(img_uint8, prd_uint8, save_path=test_save_path + '/' + case + "_vis.png", alpha=0.3, mask_color='red', dpi=300, threshold=0.5)
+
+#     return metric_list
+
+def test_single_volume(image, label, net, classes, patch_size=[256, 256], test_save_path=None, case=None, z_spacing=1, iou_thresholds=[0.5, 0.75, 0.9]):
     image, label = image.squeeze(0).cpu().detach().numpy(), label.squeeze(0).cpu().detach().numpy()
     
     prediction = np.zeros_like(label) if len(image.shape) == 3 else None  # Adjust for 2D or 3D
@@ -138,7 +205,7 @@ def test_single_volume(image, label, net, classes, patch_size=[256, 256], test_s
                 slice = image[ind, :, :]
                 x, y = slice.shape[0], slice.shape[1]
                 if x != patch_size[0] or y != patch_size[1]:
-                    slice = zoom(slice, (patch_size[0] / x, patch_size[1] / y), order=3)  # previous using 0
+                    slice = zoom(slice, (patch_size[0] / x, patch_size[1] / y), order=3)
                 input = torch.from_numpy(slice).unsqueeze(0).unsqueeze(0).float().cuda()
                 net.eval()
                 with torch.no_grad():
@@ -151,23 +218,28 @@ def test_single_volume(image, label, net, classes, patch_size=[256, 256], test_s
                         pred = out
                     prediction[ind] = pred
         else:
-            input = torch.from_numpy(image).unsqueeze(
-                0).unsqueeze(0).float().cuda()
+            input = torch.from_numpy(image).unsqueeze(0).unsqueeze(0).float().cuda()
             net.eval()
             with torch.no_grad():
                 out = torch.argmax(torch.softmax(net(input), dim=1), dim=1).squeeze(0)
                 prediction = out.cpu().detach().numpy()
                 
     metric_list = []
-    ap_list = []
+    iou_scores = {thr: [] for thr in iou_thresholds}
+    aps = {thr: [] for thr in iou_thresholds}
+    
     for i in range(1, classes):
-        metric_list.append(calculate_metric_percase(prediction == i, label == i))       
-        # pred_mask = (prediction == i).astype(int)
-        # true_mask = (label == i).astype(int)
-        # iou_scores, ap = calculate_iou_ap_per_class(pred_mask, true_mask, iou_thresholds)
-        # metric_list.append(iou_scores)
-        # ap_list.append(ap)
-
+        dice, hd95 = calculate_metric_percase(prediction == i, label == i)
+        metric_list.append((dice, hd95))  # Ensure metric_list is a list of tuples
+        
+        pred_mask = (prediction == i).astype(int)
+        true_mask = (label == i).astype(int)
+        iou_scores_list, ap = calculate_iou_ap_per_class(pred_mask, true_mask, iou_thresholds)
+        for thr, score in zip(iou_thresholds, iou_scores_list):
+            iou_scores[thr].append(score)
+        for thr in iou_thresholds:
+            aps[thr].append(ap)
+            
     if test_save_path is not None:
         # img_itk = sitk.GetImageFromArray(image.astype(np.float32))
         # prd_itk = sitk.GetImageFromArray(prediction.astype(np.float32))
@@ -190,7 +262,7 @@ def test_single_volume(image, label, net, classes, patch_size=[256, 256], test_s
         
         overlay_mask_on_image_and_save(img_uint8, prd_uint8, save_path=test_save_path + '/' + case + "_vis.png", alpha=0.3, mask_color='red', dpi=300, threshold=0.5)
 
-    return metric_list
+    return metric_list, iou_scores, aps
 
 def convert_to_uint8(image):
     """
@@ -264,7 +336,48 @@ def infer_large_image_in_patches(image, net, patch_size=(224, 224), overlap=56, 
 
     return reconstructed_image
         
-def overlay_mask_on_image_and_save(original_image, mask, save_path, alpha=0.5, mask_color='red', dpi=100, threshold=0.5):
+# def overlay_mask_on_image_and_save(original_image, mask, save_path, alpha=0.5, mask_color='red', dpi=100, threshold=0.5):
+#     """
+#     Overlay a mask on an original image with a specified color and save the result,
+#     with an option to threshold mask values.
+
+#     Parameters:
+#     - original_image: The original image as a numpy array (H, W) or (H, W, C).
+#     - mask: The mask as a numpy array (H, W), not necessarily binary.
+#     - save_path: Full path to save the overlay image.
+#     - alpha: Transparency of the mask overlay.
+#     - mask_color: Color of the mask overlay.
+#     - dpi: Dots per inch (resolution) for the saved image.
+#     - threshold: A value to threshold the mask; values above this are considered mask.
+#     """
+#     # Ensure the original image is in uint8
+#     if original_image.dtype != np.uint8:
+#         original_image = convert_to_uint8(original_image)
+
+#     # Threshold the mask
+#     binary_mask = np.where(mask > threshold, 1, 0)
+
+#     # Normalize the original image for display if needed
+#     normalized_image = original_image / 255.0 if np.max(original_image) > 1 else original_image
+
+#     # Create a color map for the mask: 0s will be transparent, 1s will be colored
+#     cmap = ListedColormap(['none', mask_color])
+
+#     fig, ax = plt.subplots()
+#     # Display the original image
+#     ax.imshow(normalized_image, cmap='gray', interpolation='none')
+#     # Overlay the binary mask with transparency
+#     ax.imshow(binary_mask, cmap=cmap, alpha=alpha, extent=(0, mask.shape[1], mask.shape[0], 0), interpolation='none')
+
+#     plt.axis('off')  # Remove the axis for a cleaner look
+#     # Calculate figure size to maintain original resolution
+#     fig_width = original_image.shape[1] / dpi
+#     fig_height = original_image.shape[0] / dpi
+#     fig.set_size_inches(fig_width, fig_height)
+#     plt.savefig(save_path, dpi=dpi, bbox_inches='tight', pad_inches=0, transparent=True)
+#     plt.close()
+    
+def overlay_mask_on_image_and_save(original_image, mask, save_path=None, alpha=0.5, mask_color='red', dpi=100, threshold=0.5):
     """
     Overlay a mask on an original image with a specified color and save the result,
     with an option to threshold mask values.
@@ -272,7 +385,7 @@ def overlay_mask_on_image_and_save(original_image, mask, save_path, alpha=0.5, m
     Parameters:
     - original_image: The original image as a numpy array (H, W) or (H, W, C).
     - mask: The mask as a numpy array (H, W), not necessarily binary.
-    - save_path: Full path to save the overlay image.
+    - save_path: Full path to save the overlay image. If None, the image will be shown instead.
     - alpha: Transparency of the mask overlay.
     - mask_color: Color of the mask overlay.
     - dpi: Dots per inch (resolution) for the saved image.
@@ -302,7 +415,11 @@ def overlay_mask_on_image_and_save(original_image, mask, save_path, alpha=0.5, m
     fig_width = original_image.shape[1] / dpi
     fig_height = original_image.shape[0] / dpi
     fig.set_size_inches(fig_width, fig_height)
-    plt.savefig(save_path, dpi=dpi, bbox_inches='tight', pad_inches=0, transparent=True)
-    plt.close()
+
+    if save_path:
+        plt.savefig(save_path, dpi=dpi, bbox_inches='tight', pad_inches=0, transparent=True)
+        plt.close()
+    else:
+        plt.show()
    
     

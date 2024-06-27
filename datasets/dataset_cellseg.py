@@ -100,52 +100,12 @@ class CellSeg_dataset(Dataset):
         self.test_split_ratio = test_split_ratio
         self.sample_list = open(os.path.join(list_dir, f'{self.split}.txt')).readlines()
         # Filter the list to exclude samples with zero masks
-        # if self.split in ["train", "test"]:
-        if self.split == "train":
+        if self.split in ["train", "test"]:
+        # if self.split == "train":
             self.filter_samples_with_nonzero_masks()
         
     def __len__(self):
         return len(self.sample_list)
-    
-    # def __getitem__(self, idx):        
-    #     if self.split == "eval":
-    #         file_stem = self.sample_list[idx].strip().rstrip('.tif')
-    #         image_path = os.path.join(self.data_dir, file_stem + '.tif')
-    #         image = Image.open(image_path).convert("L")
-            
-    #         # Initialize a default mask in case it's needed
-    #         default_mask = np.zeros_like(np.array(image), dtype=np.float32)
-        
-    #         mask_path = os.path.join(self.data_dir, file_stem + '_mask.tif')
-    #         # Check if the mask file exists
-    #         if os.path.exists(mask_path):
-    #             mask = Image.open(mask_path).convert("L")
-    #         else:
-    #             # If no corresponding mask file is found, use the default mask
-    #             mask = Image.fromarray(default_mask)
-    #     else:
-    #         file_stem = self.sample_list[idx].strip().rstrip('.png')
-    #         image_path = os.path.join(self.data_dir, file_stem + '.png')
-    #         image = Image.open(image_path).convert("L")
-            
-    #         mask_path = os.path.join(self.data_dir, file_stem + '_mask.png')
-    #         mask = Image.open(mask_path).convert("L")
-        
-    #     # Convert the mask to a numpy array
-    #     mask_array = np.array(mask)
-
-    #     # Normalize the mask to have values of 0 and 1 for training and validation splits
-    #     if self.split in ["train", "test"]:
-    #         normalized_mask = (mask_array > 0).astype(np.uint8)
-    #     else:  # For eval, the mask might be the default one, so it's already normalized
-    #         normalized_mask = mask_array
-        
-    #     sample = {'image': np.array(image), 'label': normalized_mask}
-    #     if self.transform:
-    #         sample = self.transform(sample)
-            
-    #     sample['case_name'] = file_stem
-    #     return sample
     
     def __getitem__(self, idx):
         file_stem = self.sample_list[idx].strip().rstrip('.tif').rstrip('.png')

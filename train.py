@@ -34,7 +34,7 @@ parser.add_argument('--img_size', type=int,
 parser.add_argument('--seed', type=int,
                     default=1234, help='random seed')
 parser.add_argument('--n_skip', type=int,
-                    default=0, help='using number of skip-connect, default is num')
+                    default=3, help='using number of skip-connect, default is num')
 parser.add_argument('--vit_name', type=str,
                     default='R50-ViT-B_16', help='select one vit model')
 parser.add_argument('--vit_patches_size', type=int,
@@ -95,12 +95,13 @@ if __name__ == "__main__":
     snapshot_path = snapshot_path + '_lr' + str(args.base_lr) if args.base_lr != 0.01 else snapshot_path
     snapshot_path = snapshot_path + '_'+str(args.img_size)
     snapshot_path = snapshot_path + '_s'+str(args.seed) if args.seed!=1234 else snapshot_path
-    snapshot_path += '_St' + str(args.start_epoch)
-    snapshot_path += '_SN' + str(args.sample_number)
-    snapshot_path += '_SEL' + str(args.select)
-    snapshot_path += '_SF' + str(args.sample_from)
-    snapshot_path += '_LT' + args.loss_type
-    snapshot_path += '_VOS' if args.use_vos else ""
+    if args.use_vos:
+        snapshot_path += '_St' + str(args.start_epoch)
+        snapshot_path += '_SN' + str(args.sample_number)
+        snapshot_path += '_SEL' + str(args.select)
+        snapshot_path += '_SF' + str(args.sample_from)
+        snapshot_path += '_LT' + args.loss_type
+        snapshot_path += '_VOS' if args.use_vos else ""
 
     if not os.path.exists(snapshot_path):
         os.makedirs(snapshot_path)
@@ -113,10 +114,10 @@ if __name__ == "__main__":
     net.load_from(weights=np.load(config_vit.pretrained_path))
     
     ###################### load model for visualize ################################
-    checkpoint_path = '/mnt/parscratch/users/coq20tz/TransUNet/model/TU_CellSeg224/TU_pretrain_R50-ViT-B_16_skip0_epo200_bs256_224_St150_SN100_SEL1000_SF10000_LTnorm_VOS/epoch_149.pth'
-    checkpoint = torch.load(checkpoint_path)
-    net.load_state_dict(checkpoint)  # Adjust key if necessary
-    net = net.cuda()  # Move model to GPU
+    # checkpoint_path = '/mnt/parscratch/users/coq20tz/TransUNet/model/TU_CellSeg224/TU_pretrain_R50-ViT-B_16_skip0_epo200_bs128_224_St150_SN100_SEL10000_SF100000_LTorig_VOS/epoch_199.pth'
+    # checkpoint = torch.load(checkpoint_path)
+    # net.load_state_dict(checkpoint)  # Adjust key if necessary
+    # net = net.cuda()  # Move model to GPU
     ###################### load model for visualize ################################
     
     trainer = {'CellSeg': trainer_cellseg,}

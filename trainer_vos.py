@@ -84,13 +84,13 @@ def trainer_cellseg(args, model, snapshot_path):
                 loss_outputs.extend([loss_ce_vos, loss_dice_vos])
                 
                 # Loop through all case names in the batch
-                for idx, current_filename in enumerate(sampled_batch['case_name']):
-                    if current_filename in full_filenames and (epoch_num + 10) % 10 == 0:
-                        print(current_filename)
-                        # Compute the prediction map (e.g., argmax over the output channels)
-                        syn_map = torch.softmax(syn_outputs[idx], dim=0).argmax(dim=0).squeeze().cpu().numpy()
-                        prediction_map = torch.softmax(outputs[idx], dim=0).argmax(dim=0).squeeze().cpu().numpy()
-                        save_training_sample(image_batch[idx], label_batch[idx], syn_map, prediction_map, i_batch, epoch_num, current_filename, save_dir='/mnt/parscratch/users/coq20tz/TransUNet/figs')
+                # for idx, current_filename in enumerate(sampled_batch['case_name']):
+                #     # if current_filename in full_filenames and (epoch_num + 10) % 10 == 0:
+                #     # print(current_filename)
+                #     # Compute the prediction map (e.g., argmax over the output channels)
+                #     syn_map = torch.softmax(syn_outputs[idx], dim=0).argmax(dim=0).squeeze().cpu().numpy()
+                #     prediction_map = torch.softmax(outputs[idx], dim=0).argmax(dim=0).squeeze().cpu().numpy()
+                    # save_training_sample(image_batch[idx], label_batch[idx], syn_map, prediction_map, i_batch, epoch_num, current_filename, save_dir='/mnt/parscratch/users/coq20tz/TransUNet/figs')
                     
             if args.loss_type == 'norm':
                 loss = sum(loss / (loss.detach() + epsilon) for loss in loss_outputs)

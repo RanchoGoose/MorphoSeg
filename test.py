@@ -49,65 +49,87 @@ parser.add_argument('--loss_type', type=str, default='orig')
 parser.add_argument('--use_vos', action="store_true")
 args = parser.parse_args()
 
-
-def inference(args, model, test_save_path=None):   
-    db_test = args.Dataset(base_dir=args.volume_path, split=args.data_split, list_dir=args.list_dir)
-    testloader = DataLoader(db_test, batch_size=1, shuffle=False, num_workers=1)
-    logging.info("{} test iterations per epoch".format(len(testloader)))
-    model.eval()
-    metric_list = 0.0   
-    for i_batch, sampled_batch in tqdm(enumerate(testloader)):
-        # h, w = sampled_batch["image"].size()[2:]
-        c, h, w = sampled_batch["image"].size()
-        image, label, case_name = sampled_batch["image"], sampled_batch["label"], sampled_batch['case_name'][0]
-        metric_i= test_single_volume(image, label, model, classes=args.num_classes, patch_size=[args.img_size, args.img_size],
-                                      test_save_path=test_save_path, case=case_name, z_spacing=args.z_spacing)
-        metric_list += np.array(metric_i)
-        logging.info('idx %d case %s mean_dice %f mean_hd95 %f' % (i_batch, case_name, np.mean(metric_i, axis=0)[0], np.mean(metric_i, axis=0)[1]))
-    metric_list = metric_list / len(db_test)
-    
-    for i in range(1, args.num_classes):
-        logging.info('Mean class %d mean_dice %f mean_hd95 %f' % (i, metric_list[i-1][0], metric_list[i-1][1]))
-    performance = np.mean(metric_list, axis=0)[0]
-    mean_hd95 = np.mean(metric_list, axis=0)[1]
-    logging.info('Testing performance in best val model: mean_dice : %f mean_hd95 : %f' % (performance, mean_hd95))
-    return "Testing Finished!"
-
-# def inference(args, model, test_save_path=None):
+# def inference(args, model, test_save_path=None):   
 #     db_test = args.Dataset(base_dir=args.volume_path, split=args.data_split, list_dir=args.list_dir)
 #     testloader = DataLoader(db_test, batch_size=1, shuffle=False, num_workers=1)
 #     logging.info("{} test iterations per epoch".format(len(testloader)))
-
 #     model.eval()
-#     iou_thresholds = [0.5, 0.75, 0.9]
-#     metrics_agg = {"dice": [], "hd95": [], "iou_scores": {thr: [] for thr in iou_thresholds}, "ap": []}
-
+#     metric_list = 0.0   
 #     for i_batch, sampled_batch in tqdm(enumerate(testloader)):
+#         # h, w = sampled_batch["image"].size()[2:]
+#         c, h, w = sampled_batch["image"].size()
 #         image, label, case_name = sampled_batch["image"], sampled_batch["label"], sampled_batch['case_name'][0]
-#         metrics, iou_scores = test_single_volume(image, label, model, classes=args.num_classes, 
-#                                                  patch_size=[args.img_size, args.img_size],
-#                                                  test_save_path=test_save_path, case=case_name, z_spacing=args.z_spacing)
-#         # Aggregate Dice and HD95
-#         metrics_agg["dice"].append(metrics[0])
-#         metrics_agg["hd95"].append(metrics[1])
-        
-#         # Aggregate IoU scores for each threshold
-#         for thr, score_array in zip(iou_thresholds, iou_scores):
-#             metrics_agg["iou_scores"][thr].append(score_array.any())  # Check if any IoUs exceed threshold
-
-#         # AP calculation will be done after aggregating all IoU scores
-
-#     # Calculate mean IoU scores for each threshold
-#     for thr in iou_thresholds:
-#         metrics_agg["iou_scores"][thr] = np.mean(metrics_agg["iou_scores"][thr])
-#         metrics_agg["ap"].append(metrics_agg["iou_scores"][thr])  # Assuming AP as mean of IoU > threshold
-#     mean_ap = np.mean(metrics_agg["ap"])
-
-#     # Log the IoU scores for the specified thresholds and mean AP
-#     logging.info('IoU scores for thresholds 0.5, 0.75, 0.9: {}, {}, {}'.format(metrics_agg["iou_scores"][0.5], metrics_agg["iou_scores"][0.75], metrics_agg["iou_scores"][0.9]))
-#     logging.info('Mean AP: %f' % mean_ap)
-
+#         metric_i= test_single_volume(image, label, model, classes=args.num_classes, patch_size=[args.img_size, args.img_size],
+#                                       test_save_path=test_save_path, case=case_name, z_spacing=args.z_spacing)
+#         metric_list += np.array(metric_i)
+#         logging.info('idx %d case %s mean_dice %f mean_hd95 %f' % (i_batch, case_name, np.mean(metric_i, axis=0)[0], np.mean(metric_i, axis=0)[1]))
+#     metric_list = metric_list / len(db_test)
+    
+#     for i in range(1, args.num_classes):
+#         logging.info('Mean class %d mean_dice %f mean_hd95 %f' % (i, metric_list[i-1][0], metric_list[i-1][1]))
+#     performance = np.mean(metric_list, axis=0)[0]
+#     mean_hd95 = np.mean(metric_list, axis=0)[1]
+#     logging.info('Testing performance in best val model: mean_dice : %f mean_hd95 : %f' % (performance, mean_hd95))
 #     return "Testing Finished!"
+
+def inference(args, model, test_save_path=None):
+    db_test = args.Dataset(base_dir=args.volume_path, split=args.data_split, list_dir=args.list_dir)
+    testloader = DataLoader(db_test, batch_size=1, shuffle=False, num_workers=1)
+    logging.info("{} test iterations per epoch".format(len(testloader)))
+
+    model.eval()
+    iou_thresholds = [0.5, 0.75, 0.9]
+    metrics_agg = {
+        "dice": [], 
+        "hd95": [], 
+        "iou_scores": {thr: [] for thr in iou_thresholds}, 
+        "ap": {thr: [] for thr in iou_thresholds}
+    }
+
+    for i_batch, sampled_batch in tqdm(enumerate(testloader)):
+        image, label, case_name = sampled_batch["image"], sampled_batch["label"], sampled_batch['case_name'][0]
+        metrics, iou_scores, aps = test_single_volume(
+            image, label, model, classes=args.num_classes, 
+            patch_size=[args.img_size, args.img_size],
+            test_save_path=test_save_path, case=case_name, z_spacing=args.z_spacing,
+            iou_thresholds=iou_thresholds
+        )
+        
+        # Aggregate Dice and HD95
+        for metric in metrics:
+            metrics_agg["dice"].append(metric[0])
+            metrics_agg["hd95"].append(metric[1])
+        
+        # Aggregate IoU scores and AP for each threshold
+        for thr in iou_thresholds:
+            metrics_agg["iou_scores"][thr].extend(iou_scores[thr])
+            metrics_agg["ap"][thr].extend(aps[thr])
+
+    # Calculate mean IoU scores and AP for each threshold
+    for thr in iou_thresholds:
+        metrics_agg["iou_scores"][thr] = np.mean(metrics_agg["iou_scores"][thr])
+        metrics_agg["ap"][thr] = np.mean(metrics_agg["ap"][thr])
+
+    # Print mean Dice and HD95 for each class
+    for i in range(1, args.num_classes):
+        class_dices = [metrics_agg["dice"][j] for j in range(len(metrics_agg["dice"])) if (j % (args.num_classes - 1)) == (i - 1)]
+        class_hd95s = [metrics_agg["hd95"][j] for j in range(len(metrics_agg["hd95"])) if (j % (args.num_classes - 1)) == (i - 1)]
+        mean_dice = np.mean(class_dices)
+        mean_hd95 = np.mean(class_hd95s)
+        logging.info('Mean class %d mean_dice %f mean_hd95 %f' % (i, mean_dice, mean_hd95))
+
+    performance = np.mean(metrics_agg["dice"])
+    mean_hd95 = np.mean(metrics_agg["hd95"])
+    logging.info('Testing performance in best val model: mean_dice : %f mean_hd95 : %f' % (performance, mean_hd95))
+    
+    mean_ap = np.mean([metrics_agg["ap"][thr] for thr in iou_thresholds])
+    # Log the IoU scores for the specified thresholds and mean AP
+    logging.info('IoU scores for thresholds 0.5, 0.75, 0.9: {}, {}, {}'.format(
+        metrics_agg["iou_scores"][0.5], metrics_agg["iou_scores"][0.75], metrics_agg["iou_scores"][0.9]
+    ))
+    logging.info('Mean AP: %f' % mean_ap)
+
+    return "Testing Finished!"
 
 if __name__ == "__main__":
 
@@ -154,12 +176,13 @@ if __name__ == "__main__":
     snapshot_path = snapshot_path + '_lr' + str(args.base_lr) if args.base_lr != 0.01 else snapshot_path
     snapshot_path = snapshot_path + '_'+str(args.img_size)
     snapshot_path = snapshot_path + '_s'+str(args.seed) if args.seed!=1234 else snapshot_path
-    snapshot_path += '_St' + str(args.start_epoch)
-    snapshot_path += '_SN' + str(args.sample_number)
-    snapshot_path += '_SEL' + str(args.select)
-    snapshot_path += '_SF' + str(args.sample_from)
-    snapshot_path += '_LT' + args.loss_type
-    snapshot_path += '_VOS' if args.use_vos else ""
+    if args.use_vos:
+        snapshot_path += '_St' + str(args.start_epoch)
+        snapshot_path += '_SN' + str(args.sample_number)
+        snapshot_path += '_SEL' + str(args.select)
+        snapshot_path += '_SF' + str(args.sample_from)
+        snapshot_path += '_LT' + args.loss_type
+        snapshot_path += '_VOS' if args.use_vos else ""
     
     config_vit = CONFIGS_ViT_seg[args.vit_name]
     config_vit.n_classes = args.num_classes
