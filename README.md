@@ -24,7 +24,7 @@ mkdir ../model/vit_checkpoint/imagenet21k &&
 mv {MODEL_NAME}.npz ../model/vit_checkpoint/imagenet21k/{MODEL_NAME}.npz
 ```
 
-*For inference only, download the provided [checkpoint](https://drive.google.com/drive/folders/1A2fYP5uPjevKxKek0pneYLQzUPSQISua?usp=sharing), put the whole folder under the ./model/ path.
+*For inference only, download the provided [checkpoint](https://drive.google.com/drive/folders/1A2fYP5uPjevKxKek0pneYLQzUPSQISua?usp=sharing), you will need to download the whole folder and put it under the ./model/ path. Create model folder if you dont have one.
 
 
 
@@ -66,10 +66,9 @@ python test.py --volume_path 'your path to images' --max_epochs 200 --batch_size
 
 ### 5. Single image visualization demo
 
-For single image visualization, please open the inference.ipynb in jupyter notebook, put your testing images under the folder ./vis/, and then run the notebook for results. Note that you still need to install the dependencies first (Step 1).
+For single image visualization, please open the inference.ipynb in jupyter notebook, put your testing images under the folder ./vis/, and then run the notebook for results. Note that you still need to install the dependencies first (Step 1). 
 
-
-
+Please note that if you are not using the provided checkpoint, you will need to change the snapshot_path and other configs in the notebook.
 
 ## Reference
 [TransUNet](https://arxiv.org/pdf/2102.04306.pdf)
