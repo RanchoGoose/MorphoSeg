@@ -43,30 +43,44 @@ Generate Eval List by running:
 python data_pre.py --mode eval --image_dir /path/to/images --lists_dir /path/to/lists
 ```
 
-The data and the lists should be under a directory structure like this:
+The whole data and the lists should be under a directory structure like this:
 ```bash
-/path/to
-│
-├── dataset
-│   ├── image1.png
-│   ├── image1_mask.png
-│   ├── image1_ps224_0_0.png
-│   ├── image1_ps224_0_0_mask.png
-│   ├── image1_ps448_0_0.png
-│   ├── image1_ps448_0_0_mask.png
-│   ├── ...
-│   ├── image2.png
-│   ├── image2_mask.png
-│   ├── image2_ps224_0_0.png
-│   ├── image2_ps224_0_0_mask.png
-│   ├── image2_ps448_0_0.png
-│   ├── image2_ps448_0_0_mask.png
-│   ├── ...
-│
-└── lists
+Cellseg_UOS/
+├── data/
+│   └── Cell/
+│       ├── image1.png
+│       ├── image1_mask.png
+│       ├── image1_ps224_0_0.png
+│       ├── image1_ps224_0_0_mask.png
+│       ├── image1_ps448_0_0.png
+│       ├── image1_ps448_0_0_mask.png
+│       ├── ...
+│       ├── image2.png
+│       ├── image2_mask.png
+│       ├── image2_ps224_0_0.png
+│       ├── image2_ps224_0_0_mask.png
+│       ├── image2_ps448_0_0.png
+│       ├── image2_ps448_0_0_mask.png
+│       ├── ...
+├── model/
+│   ├── vit_checkpoint/
+│   │   └── imagenet21k/
+│   │       ├── R50+ViT-B_16.npz       # Pretrained model checkpoint
+│   │       └── *.npz                  # Other model checkpoints
+│   └── TU_CellSeg224/
+│       └── TU_pretrain_R50-ViT-B_16_skip0_epo200_bs128_224_St150_SN100_SEL10000_SF100000_LTpareto_VOS/
+│           ├── epoch_199.pth          # Model weights
+│           └── ...                        
+└── lists/
     ├── train.txt
     ├── test.txt
     ├── eval.txt
+├── datasets/
+├── vis/
+├── data_pre.py
+├── train.py
+├── test.py
+├── ...
 ```
 
 ### 4. Train/Test

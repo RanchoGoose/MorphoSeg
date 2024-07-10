@@ -4,5 +4,7 @@ results/
 test_log/
 predictions/
 data/
+lists/
+vis/
 cellhead.py
 data_argument.py
