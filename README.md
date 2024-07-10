@@ -1,11 +1,11 @@
 # Cellseg_UoS
-This repo holds code for stem cell segmentation. The codes are built based on the original TransUNet repo: [TransUNet](https://github.com/Beckschen/TransUNet).
+This repository holds code for stem cell segmentation. The codes are built based on the original TransUNet repo: [TransUNet](https://github.com/Beckschen/TransUNet).
 
 ## Usage
 
 ### 1. Prepare the environment
 
-Please prepare an environment with python=3.10, We recommand using Anaconda3.
+Please prepare an environment with python=3.10, We recommand using Anaconda3. 
 
 After installing python(Anaconda), please run the following command for installing the dependencies.
 
@@ -13,9 +13,9 @@ After installing python(Anaconda), please run the following command for installi
 pip install -r requirements.txt
 ```
 
-### 2. Prepare pretrained model and data
+### 2. Prepare pretrained model
 
-To train your own model from zero please down the Google ViT pre-trained models
+To train your own model from zero please download the Google ViT pre-trained models
 * [Get models in this link](https://console.cloud.google.com/storage/vit_models/): R50-ViT-B_16, ViT-B_16, ViT-L_16...
 or run the following commands replacing the {MODEL_NAME} to one of the R50-ViT-B_16, ViT-B_16, ViT-L_16..
 ```bash
@@ -26,23 +26,47 @@ mv {MODEL_NAME}.npz ../model/vit_checkpoint/imagenet21k/{MODEL_NAME}.npz
 
 *For inference only, download the provided [checkpoint](https://drive.google.com/drive/folders/1A2fYP5uPjevKxKek0pneYLQzUPSQISua?usp=sharing), you will need to download the whole folder and put it under the ./model/ path. Create model folder if you dont have one.
 
-
-
 ### 3. Prepare data
 
 Prepare the data and generate Train and Test Lists:
 
-Download the data dirst, then run the following script to spilit the data into training and testing 224x224 patches, you will need to change the data path in the script:
+Download the data first, then run the following script to spilit the data into training and testing 224x224 patches, you will need to change the data path in the script:
 
 ```bash
-python data_pre.py --mode train_test --dataset_dir /path/to/dataset --lists_dir /path/to/lists --train_ratio 0.8
+python data_pre.py --mode train_test --divide --image_dir /path/to/images --mask_dir /path/to/masks --dataset_dir /path/to/training_and_testing_patches --lists_dir /path/to/lists
 ```
 
 For multi images inference only:
 Generate Eval List by running:
 
 ```bash
-python data_pre.py --mode eval --image_dir /path/to/images --mask_dir /path/to/masks --output_dir /path/to/output --lists_dir /path/to/lists
+python data_pre.py --mode eval --image_dir /path/to/images --lists_dir /path/to/lists
+```
+
+The data and the lists should be under a directory structure like this:
+```bash
+/path/to
+│
+├── dataset
+│   ├── image1.png
+│   ├── image1_mask.png
+│   ├── image1_ps224_0_0.png
+│   ├── image1_ps224_0_0_mask.png
+│   ├── image1_ps448_0_0.png
+│   ├── image1_ps448_0_0_mask.png
+│   ├── ...
+│   ├── image2.png
+│   ├── image2_mask.png
+│   ├── image2_ps224_0_0.png
+│   ├── image2_ps224_0_0_mask.png
+│   ├── image2_ps448_0_0.png
+│   ├── image2_ps448_0_0_mask.png
+│   ├── ...
+│
+└── lists
+    ├── train.txt
+    ├── test.txt
+    ├── eval.txt
 ```
 
 ### 4. Train/Test

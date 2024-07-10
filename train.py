@@ -113,12 +113,12 @@ if __name__ == "__main__":
     net = ViT_seg(config_vit, img_size=args.img_size, num_classes=config_vit.n_classes).cuda()
     net.load_from(weights=np.load(config_vit.pretrained_path))
     
-    ###################### load model for visualize ################################
+    ##################### load model for visualize ################################
     # checkpoint_path = '/mnt/parscratch/users/coq20tz/TransUNet/model/TU_CellSeg224/TU_pretrain_R50-ViT-B_16_skip0_epo200_bs128_224_St150_SN100_SEL10000_SF100000_LTorig_VOS/epoch_199.pth'
     # checkpoint = torch.load(checkpoint_path)
     # net.load_state_dict(checkpoint)  # Adjust key if necessary
     # net = net.cuda()  # Move model to GPU
-    ###################### load model for visualize ################################
+    ##################### load model for visualize ################################
     
     trainer = {'CellSeg': trainer_cellseg,}
     trainer[dataset_name](args, net, snapshot_path)

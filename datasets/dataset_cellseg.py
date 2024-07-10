@@ -141,24 +141,24 @@ class CellSeg_dataset(Dataset):
                     filtered_list.append(file_name)
         self.sample_list = filtered_list
         
-    def generate_or_load_splits(self, list_dir):
-        train_list_path = os.path.join(list_dir, 'train.txt')
-        test_list_path = os.path.join(list_dir, 'test.txt')
+    # def generate_or_load_splits(self, list_dir):
+    #     train_list_path = os.path.join(list_dir, 'train.txt')
+    #     test_list_path = os.path.join(list_dir, 'test.txt')
 
-        if os.path.exists(train_list_path) and os.path.exists(test_list_path):
-            return
+    #     if os.path.exists(train_list_path) and os.path.exists(test_list_path):
+    #         return
         
-        all_files = [f for f in os.listdir(self.data_dir) if f.endswith('.png') and not f.endswith('_mask.png')]
-        np.random.shuffle(all_files)
-        split_idx = int(len(all_files) * (1 - self.test_split_ratio))
-        train_files, test_files = all_files[:split_idx], all_files[split_idx:]
+    #     all_files = [f for f in os.listdir(self.data_dir) if f.endswith('.png') and not f.endswith('_mask.png')]
+    #     np.random.shuffle(all_files)
+    #     split_idx = int(len(all_files) * (1 - self.test_split_ratio))
+    #     train_files, test_files = all_files[:split_idx], all_files[split_idx:]
 
-        with open(train_list_path, 'w') as f:
-            for item in train_files:
-                f.write("%s\n" % item)
+    #     with open(train_list_path, 'w') as f:
+    #         for item in train_files:
+    #             f.write("%s\n" % item)
                 
-        with open(test_list_path, 'w') as f:
-            for item in test_files:
-                f.write("%s\n" % item)
+    #     with open(test_list_path, 'w') as f:
+    #         for item in test_files:
+    #             f.write("%s\n" % item)
 
 
