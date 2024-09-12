@@ -1,7 +1,7 @@
 # MorphoSeg
 This repository holds code for stem cell segmentation. The codes are built based on the original TransUNet repo: [TransUNet](https://github.com/Beckschen/TransUNet).
 
-Our dataset is available at https://orda.shef.ac.uk/account/projects/201540/articles/25604421 
+Our NT2 cell dataset is available at https://orda.shef.ac.uk/account/projects/201540/articles/25604421 
 
 ## Visualization Example
 ![Example Image](example/example.png)
