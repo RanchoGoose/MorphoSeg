@@ -35,11 +35,10 @@ def trainer_cellseg(args, model, snapshot_path):
                                    [RandomGenerator(output_size=[args.img_size, args.img_size])]))
     print("The length of train set is: {}".format(len(db_train)))
 
-    def worker_init_fn(worker_id):
-        random.seed(args.seed + worker_id)
+    # def worker_init_fn(worker_id):
+    #     random.seed(args.seed + worker_id)
 
-    trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True,
-                             worker_init_fn=worker_init_fn)
+    trainloader = DataLoader(db_train, batch_size=batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True)
     if args.n_gpu > 1:
         model = nn.DataParallel(model)
     model.train()
@@ -55,9 +54,9 @@ def trainer_cellseg(args, model, snapshot_path):
     iterator = tqdm(range(max_epoch), ncols=70)
     epsilon = 1e-8
     
-    # Read the training filenames from train.txt
-    with open('/mnt/parscratch/users/coq20tz/TransUNet/lists/cellseg/train_full.txt', 'r') as file:
-        full_filenames = file.read().splitlines()
+    # # Read the training filenames from train.txt
+    # with open('/mnt/parscratch/users/coq20tz/TransUNet/lists/cellseg/train_full.txt', 'r') as file:
+    #     full_filenames = file.read().splitlines()
     
     # data_dict = {class_index: torch.tensor([]).cuda() for class_index in range(num_classes)}
     for epoch_num in iterator:

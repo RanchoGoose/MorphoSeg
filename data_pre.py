@@ -77,6 +77,7 @@ def generate_train_test_lists(dataset_dir, lists_dir, train_ratio=0.8):
     test_files = test_files_full + test_files_patches
 
     def write_paths(file_list, file_path):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w') as file:
             for item in file_list:
                 file.write("%s\n" % item)

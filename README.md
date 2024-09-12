@@ -1,5 +1,10 @@
-# Cellseg_UoS
+# MorphoSeg
 This repository holds code for stem cell segmentation. The codes are built based on the original TransUNet repo: [TransUNet](https://github.com/Beckschen/TransUNet).
+
+Our dataset is available at https://orda.shef.ac.uk/account/projects/201540/articles/25604421 
+
+## Visualization Example
+![Example Image](example/example.png)
 
 ## Usage
 
@@ -108,8 +113,6 @@ For single image visualization, please open the inference.ipynb in jupyter noteb
 
 Please note that if you are not using the provided checkpoint, you will need to change the snapshot_path and other configs in the notebook.
 
-## Reference
-[TransUNet](https://arxiv.org/pdf/2102.04306.pdf)
 
 ## Citations
 
