@@ -115,7 +115,16 @@ Please note that if you are not using the provided checkpoint, you will need to 
 
 
 ## Citations
-
+```
+@article{ZHANG2025130511,
+title = {MorphoSeg: An uncertainty-aware deep learning method for biomedical segmentation of complex cellular morphologies},
+journal = {Neurocomputing},
+volume = {647},
+pages = {130511},
+year = {2025},
+author = {Tianhao Zhang and Heather J. McCourty and Berardo M. Sanchez-Tafolla and Anton Nikolaev and Lyudmila S. Mihaylova}
+}
+```
 <!-- ```bibtex
 
 ``` -->
